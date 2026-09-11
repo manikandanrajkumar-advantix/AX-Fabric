@@ -1,0 +1,11 @@
+BEGIN;
+CREATE SCHEMA IF NOT EXISTS oca;
+CREATE TABLE IF NOT EXISTS oca.catalog_runs(run_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),scope_id UUID NOT NULL REFERENCES knowledge.scopes(scope_id),started_at TIMESTAMPTZ NOT NULL,finished_at TIMESTAMPTZ,status TEXT NOT NULL CHECK(status IN ('running','succeeded','partial','failed')),api_pages INTEGER NOT NULL DEFAULT 0,repository_count INTEGER NOT NULL DEFAULT 0,error_summary TEXT);
+CREATE TABLE IF NOT EXISTS oca.repositories(repository_id BIGINT PRIMARY KEY,scope_id UUID NOT NULL REFERENCES knowledge.scopes(scope_id),full_name TEXT NOT NULL UNIQUE,html_url TEXT NOT NULL,clone_url TEXT NOT NULL,default_branch TEXT,archived BOOLEAN NOT NULL,disabled BOOLEAN NOT NULL,fork BOOLEAN NOT NULL,license_spdx TEXT,description TEXT,pushed_at TIMESTAMPTZ,updated_at TIMESTAMPTZ,last_catalog_run_id UUID NOT NULL REFERENCES oca.catalog_runs(run_id),metadata JSONB NOT NULL DEFAULT '{}');
+CREATE TABLE IF NOT EXISTS oca.catalog_pages(page_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),run_id UUID NOT NULL REFERENCES oca.catalog_runs(run_id),artifact_id UUID NOT NULL REFERENCES source_registry.artifacts(artifact_id),page_number INTEGER NOT NULL,http_etag TEXT,content_sha256 TEXT NOT NULL CHECK(content_sha256 ~ '^[0-9a-f]{64}$'),UNIQUE(run_id,page_number));
+CREATE INDEX IF NOT EXISTS idx_oca_repositories_active ON oca.repositories(archived,disabled,pushed_at DESC);
+ALTER TABLE oca.catalog_runs ENABLE ROW LEVEL SECURITY; ALTER TABLE oca.repositories ENABLE ROW LEVEL SECURITY;
+CREATE POLICY scope_access ON oca.catalog_runs USING(platform.scope_visible(scope_id)) WITH CHECK(platform.scope_visible(scope_id));
+CREATE POLICY scope_access ON oca.repositories USING(platform.scope_visible(scope_id)) WITH CHECK(platform.scope_visible(scope_id));
+INSERT INTO platform.schema_migrations(migration_id,checksum) VALUES('013_oca_repository_catalog','managed-by-repository') ON CONFLICT DO NOTHING;
+COMMIT;

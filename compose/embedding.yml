@@ -1,0 +1,33 @@
+name: ax-fabric
+services:
+  embedding-cache-init:
+    image: ax-fabric-embedding-worker:latest
+    user: "0:0"
+    entrypoint: ["sh","-c"]
+    command: ["chown -R 65532:65532 /model-cache"]
+    volumes:
+      - embedding-model-cache:/model-cache
+  embedding-worker:
+    image: ax-fabric-embedding-worker:latest
+    build:
+      context: ../services/ingestion-worker
+    entrypoint: ["python","-m","app.embed_passages"]
+    depends_on:
+      embedding-cache-init:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      EMBEDDING_MODEL: intfloat/multilingual-e5-small
+      EMBEDDING_MODEL_REVISION: 919cfbe11fbf4f1b9bb321007c46c14feaf84227
+      EMBEDDING_BATCH_SIZE: "32"
+      ODOO_VERSION: ${ODOO_VERSION:-19.0}
+      HF_HOME: /model-cache
+    volumes:
+      - embedding-model-cache:/model-cache
+    networks: [ax-fabric]
+networks:
+  ax-fabric:
+    external: true
+    name: ax-fabric
+volumes:
+  embedding-model-cache:

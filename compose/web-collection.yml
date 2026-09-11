@@ -1,0 +1,105 @@
+name: ax-fabric
+services:
+  web-collector:
+    build: {context: ../services/ingestion-worker}
+    entrypoint: ["python","-m","app.web_collect"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      S3_ENDPOINT: http://ax-minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      SOURCE_CATALOG: /catalog/odoo-public-web-v1.json
+    volumes: ["../data/source-catalogs:/catalog:ro"]
+    networks: [ax-fabric]
+  web-normalizer:
+    build: {context: ../services/ingestion-worker}
+    entrypoint: ["python","-m","app.web_normalize"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      S3_ENDPOINT: http://ax-minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+    networks: [ax-fabric]
+  web-indexer:
+    build: {context: ../services/ingestion-worker}
+    entrypoint: ["python","-m","app.web_index"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      EMBEDDING_MODEL: intfloat/multilingual-e5-small
+      EMBEDDING_MODEL_REVISION: 919cfbe11fbf4f1b9bb321007c46c14feaf84227
+      HF_HOME: /model-cache
+    volumes: ["embedding-model-cache:/model-cache"]
+    networks: [ax-fabric]
+  web-claim-extractor:
+    build: {context: ../services/ingestion-worker}
+    entrypoint: ["python","-m","app.web_claims"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+    networks: [ax-fabric]
+  oca-catalog-collector:
+    build: {context: ../services/ingestion-worker}
+    entrypoint: ["python","-m","app.oca_catalog"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      S3_ENDPOINT: http://ax-minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    networks: [ax-fabric]
+  oca-branch-collector:
+    build:
+      context: ../services/ingestion-worker
+      dockerfile: Dockerfile.git
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      S3_ENDPOINT: http://ax-minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+    networks: [ax-fabric]
+  oca-manifest-collector:
+    build: {context: ../services/ingestion-worker, dockerfile: Dockerfile.git}
+    entrypoint: ["python","-m","app.oca_manifests"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      S3_ENDPOINT: http://ax-minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+    networks: [ax-fabric]
+  oca-assessor:
+    build: {context: ../services/ingestion-worker}
+    entrypoint: ["python","-m","app.oca_assess"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+    networks: [ax-fabric]
+  oca-document-collector:
+    build: {context: ../services/ingestion-worker, dockerfile: Dockerfile.git}
+    entrypoint: ["python","-m","app.oca_docs"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      S3_ENDPOINT: http://ax-minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+    networks: [ax-fabric]
+  oca-document-indexer:
+    build: {context: ../services/ingestion-worker}
+    entrypoint: ["python","-m","app.oca_docs_index"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      EMBEDDING_MODEL: intfloat/multilingual-e5-small
+      EMBEDDING_MODEL_REVISION: 919cfbe11fbf4f1b9bb321007c46c14feaf84227
+      HF_HOME: /model-cache
+    volumes: ["embedding-model-cache:/model-cache"]
+    networks: [ax-fabric]
+  oca-document-reparser:
+    build: {context: ../services/ingestion-worker}
+    entrypoint: ["python","-m","app.oca_docs_reparse"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      S3_ENDPOINT: http://ax-minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+    networks: [ax-fabric]
+networks:
+  ax-fabric: {external: true, name: ax-fabric}
+volumes:
+  embedding-model-cache: {name: ax-fabric_embedding-model-cache}

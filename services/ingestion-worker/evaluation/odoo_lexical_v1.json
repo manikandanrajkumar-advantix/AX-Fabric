@@ -1,0 +1,27 @@
+{
+  "name": "odoo-19-lexical-v1",
+  "source_revision": "0937ae12d0206b1229730a13ca99b8a78bfc2b6b",
+  "top_k": 10,
+  "cases": [
+    {"id":"Q01","question":"What are the Odoo Community and Enterprise editions?","expected_paths":["administration.rst","legal/licenses.rst","administration/on_premise/community_to_enterprise.rst"]},
+    {"id":"Q02","question":"How does Odoo Online database hosting work?","expected_paths":["administration/odoo_online.rst"]},
+    {"id":"Q03","question":"How are Odoo.sh branches used?","expected_paths":["administration/odoo_sh/getting_started/branches.rst"]},
+    {"id":"Q04","question":"How do I install Odoo from source on premise?","expected_paths":["administration/on_premise/source.rst"]},
+    {"id":"Q05","question":"Which Odoo versions receive standard and extended support?","expected_paths":["administration/standard_extended_support.rst"]},
+    {"id":"Q06","question":"What licenses apply to Odoo Community and Enterprise?","expected_paths":["legal/licenses.rst","administration.rst"]},
+    {"id":"Q07","question":"How do automated actions work in Odoo Studio?","expected_paths":["applications/studio/automated_actions.rst"]},
+    {"id":"Q08","question":"How can Studio add and configure fields?","expected_paths":["applications/studio/fields.rst"]},
+    {"id":"Q09","question":"How are access rights and record rules configured?","expected_paths":["developer/tutorials/restrict_data_access.rst","applications/general/users/access_rights.rst"]},
+    {"id":"Q10","question":"How do lots track product batches in inventory?","expected_paths":["applications/inventory_and_mrp/inventory/product_management/product_tracking/lots.rst"]},
+    {"id":"Q11","question":"How do serial numbers track individual products?","expected_paths":["applications/inventory_and_mrp/inventory/product_management/product_tracking/serial_numbers.rst"]},
+    {"id":"Q12","question":"How are reordering rules used for replenishment?","expected_paths":["applications/inventory_and_mrp/inventory/warehouses_storage/replenishment/reordering_rules.rst"]},
+    {"id":"Q13","question":"How are sales quotations created?","expected_paths":["applications/sales/sales/sales_quotations/create_quotations.rst","applications/sales/sales/sales_quotations.rst","applications/sales/sales/sales_quotations/quote_template.rst"]},
+    {"id":"Q14","question":"How does Odoo Point of Sale work in shops?","expected_paths":["applications/sales/point_of_sale/shop.rst","applications/sales/point_of_sale.rst"]},
+    {"id":"Q15","question":"How are fiscal localizations installed for accounting?","expected_paths":["applications/finance/fiscal_localizations.rst"]},
+    {"id":"Q16","question":"How are online payment providers configured?","expected_paths":["applications/finance/payment_providers.rst"]},
+    {"id":"Q17","question":"How are project tasks and task stages managed?","expected_paths":["applications/services/project/tasks.rst","applications/services/project/tasks/task_stages_statuses.rst"]},
+    {"id":"Q18","question":"How does Helpdesk receive support tickets?","expected_paths":["applications/services/helpdesk/overview/receiving_tickets.rst","applications/services/helpdesk.rst"]},
+    {"id":"Q19","question":"How do employees request time off?","expected_paths":["applications/hr/time_off/request_time_off.rst"]},
+    {"id":"Q20","question":"How does the Odoo external JSON-2 API work?","expected_paths":["developer/reference/external_api.rst"]}
+  ]
+}

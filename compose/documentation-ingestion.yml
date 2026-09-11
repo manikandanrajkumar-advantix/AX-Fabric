@@ -1,0 +1,22 @@
+name: ax-fabric
+services:
+  documentation-ingestion-worker:
+    build:
+      context: ../services/ingestion-worker
+    entrypoint: ["python", "-m", "app.document_ingest"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ax-postgres:5432/${POSTGRES_DB}
+      S3_ENDPOINT: http://ax-minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      ODOO_DOCUMENTATION_ROOT: /documentation/content
+      ODOO_DOCUMENTATION_REVISION: ${ODOO_DOCUMENTATION_REVISION:?ODOO_DOCUMENTATION_REVISION is required}
+      ODOO_VERSION: ${ODOO_VERSION:-19.0}
+    volumes:
+      - ${ODOO_DOCUMENTATION_PATH:-../data/sources/odoo-documentation-19}:/documentation:ro
+    networks:
+      - ax-fabric
+networks:
+  ax-fabric:
+    external: true
+    name: ax-fabric
